@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Serilog;
 
 namespace Modbus.Net
 {
@@ -327,7 +326,7 @@ namespace Modbus.Net
                         catch (Exception e)
                         {
                             ErrorCount++;
-                            Log.Error(e, $"BaseMachine -> GetDatas, Id:{Id} Connection:{ConnectionToken} key {key} existing. ErrorCount {ErrorCount}.");
+                            //Log.Error(e, $"BaseMachine -> GetDatas, Id:{Id} Connection:{ConnectionToken} key {key} existing. ErrorCount {ErrorCount}.");
 
                             if (ErrorCount >= _maxErrorCount)
                                 Disconnect();
@@ -346,7 +345,7 @@ namespace Modbus.Net
             catch (Exception e)
             {
                 ErrorCount++;
-                Log.Error(e, $"BaseMachine -> GetDatas, Id:{Id} Connection:{ConnectionToken} error. ErrorCount {ErrorCount}.");
+                //Log.Error(e, $"BaseMachine -> GetDatas, Id:{Id} Connection:{ConnectionToken} error. ErrorCount {ErrorCount}.");
                 
                 if (ErrorCount >= _maxErrorCount)
                     Disconnect();
@@ -424,13 +423,13 @@ namespace Modbus.Net
                     //地址为空报错
                     if (address == null)
                     {
-                        Log.Error($"Machine {ConnectionToken} Address {value.Key} doesn't exist.");
+                        //Log.Error($"Machine {ConnectionToken} Address {value.Key} doesn't exist.");
                         continue;
                     }
                     //不能写报错
                     if (!address.CanWrite)
                     {
-                        Log.Error($"Machine {ConnectionToken} Address {value.Key} cannot write.");
+                        //Log.Error($"Machine {ConnectionToken} Address {value.Key} cannot write.");
                         continue;
                     }
                     addresses.Add(address);
@@ -546,7 +545,7 @@ namespace Modbus.Net
             catch (Exception e)
             {
                 ErrorCount++;
-                Log.Error(e, $"BaseMachine -> SetDatas, Id:{Id} Connection:{ConnectionToken} error. ErrorCount {ErrorCount}.");
+                //Log.Error(e, $"BaseMachine -> SetDatas, Id:{Id} Connection:{ConnectionToken} error. ErrorCount {ErrorCount}.");
 
                 if (ErrorCount >= _maxErrorCount)
                     Disconnect();
@@ -653,7 +652,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                Log.Error(e, $"BaseMachine -> GetAddressUnitById Id:{Id} ConnectionToken:{ConnectionToken} addressUnitId:{addressUnitId} Repeated");
+                //Log.Error(e, $"BaseMachine -> GetAddressUnitById Id:{Id} ConnectionToken:{ConnectionToken} addressUnitId:{addressUnitId} Repeated");
                 return null;
             }
         }

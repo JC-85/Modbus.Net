@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Serilog;
 
 namespace Modbus.Net.Modbus
 {
@@ -127,7 +126,7 @@ namespace Modbus.Net.Modbus
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, $"ModbusUtility: {ConnectionString} format error");
+                    //Log.Error(e, $"ModbusUtility: {ConnectionString} format error");
                     return null;
                 }
             }
@@ -213,7 +212,7 @@ namespace Modbus.Net.Modbus
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> GetTime: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> GetTime: {ConnectionString} error");
                 return DateTime.MinValue;
             }
         }
@@ -235,7 +234,7 @@ namespace Modbus.Net.Modbus
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> SetTime: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> SetTime: {ConnectionString} error");
                 return false;
             }
         }
@@ -268,7 +267,7 @@ namespace Modbus.Net.Modbus
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> GetDatas: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> GetDatas: {ConnectionString} error");
                 return null;
             }
         }
@@ -292,7 +291,7 @@ namespace Modbus.Net.Modbus
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> SetDatas: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> SetDatas: {ConnectionString} error");
                 return false;
             }
         }
@@ -316,7 +315,7 @@ namespace Modbus.Net.Modbus
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> SetSingleDatas: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> SetSingleDatas: {ConnectionString} error");
                 return false;
             }
         }

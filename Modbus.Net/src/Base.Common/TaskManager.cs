@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Serilog;
 
 namespace Modbus.Net
 {
@@ -849,7 +848,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                Log.Error(e, $"Device {id} get error, maybe duplicated in taskmanager");
+                //Log.Error(e, $"Device {id} get error, maybe duplicated in taskmanager");
                 return null;
             }
         }
@@ -874,7 +873,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                Log.Error(e, $"Device {connectionToken} get error, maybe duplicated in taskmanager");
+                //Log.Error(e, $"Device {connectionToken} get error, maybe duplicated in taskmanager");
                 return null;
             }
         }

@@ -212,14 +212,11 @@ namespace Modbus.Net
             return null;
         }
 
-        /// <summary>
-        ///     注册一个协议
-        /// </summary>
-        /// <param name="linkProtocal">需要注册的协议</param>
-        protected void Register(TProtocalUnit linkProtocal)
+        
+        protected void Register(TProtocalUnit linkProtocol)
         {
-            if (linkProtocal == null) return;
-            Protocals.Add(linkProtocal.GetType().FullName, linkProtocal);
+            if (linkProtocol == null) return;
+            Protocals.Add(linkProtocol.GetType().FullName, linkProtocol);
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Serilog;
 
 namespace Modbus.Net
 {
@@ -714,7 +713,7 @@ namespace Modbus.Net
                     }
                     catch (Exception e)
                     {
-                        Log.Error(e, "ValueHelper -> ByteArrayToObjectArray error");
+                        //Log.Error(e, "ValueHelper -> ByteArrayToObjectArray error");
                         count = contents.Length;
                     }
                 }
@@ -822,7 +821,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                Log.Error(e, "ValueHelper -> SetValue set value failed");
+                //Log.Error(e, "ValueHelper -> SetValue set value failed");
                 return false;
             }
         }
@@ -871,7 +870,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                Log.Error(e, "ValueHelper -> SetBit set bit failed");
+                //Log.Error(e, "ValueHelper -> SetBit set bit failed");
                 return false;
             }
         }

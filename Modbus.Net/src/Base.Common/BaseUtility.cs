@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Serilog;
 
 /// <summary>
 ///     端格式
@@ -127,7 +126,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> GetDatas: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> GetDatas: {ConnectionString} error");
                 return null;
             }
         }
@@ -163,7 +162,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> GetDatas Generic: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> GetDatas Generic: {ConnectionString} error");
                 return null;
             }
         }
@@ -204,7 +203,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> GetDatas pair: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> GetDatas pair: {ConnectionString} error");
                 return null;
             }
         }

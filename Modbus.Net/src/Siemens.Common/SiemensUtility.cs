@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Serilog;
+
 
 namespace Modbus.Net.Siemens
 {
@@ -166,7 +166,7 @@ namespace Modbus.Net.Siemens
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, $"SiemensUtility: {ConnectionString} format error");
+                    //Log.Error(e, $"SiemensUtility: {ConnectionString} format error");
                     return null;
                 }
             }
@@ -242,7 +242,7 @@ namespace Modbus.Net.Siemens
             }
             catch (Exception e)
             {
-                Log.Error(e, $"SiemensUtility -> GetDatas: {ConnectionString} error");
+                //Log.Error(e, $"SiemensUtility -> GetDatas: {ConnectionString} error");
                 return null;
             }
         }
@@ -268,7 +268,7 @@ namespace Modbus.Net.Siemens
             }
             catch (Exception e)
             {
-                Log.Error(e, $"ModbusUtility -> SetDatas: {ConnectionString} error");
+                //Log.Error(e, $"ModbusUtility -> SetDatas: {ConnectionString} error");
                 return false;
             }
         }
