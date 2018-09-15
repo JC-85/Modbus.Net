@@ -156,3 +156,7 @@ $RECYCLE.BIN/
 .DS_Store
 /Modbus.Net/packages
 /Modbus.Net/.vs
+/Modbus.Net/Removed
+/Tests/Modbus.Tests.Old
+/.vs
+/Removed
