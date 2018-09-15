@@ -5,6 +5,6 @@ script:
         - dotnet restore
         - dotnet build ./Modbus.Net/
         - dotnet build ./src/
-        - dotnet test ~/Tests/Modbus.Net.Tests/
+        - dotnet test ./Tests/Modbus.Net.Tests/
 
 
