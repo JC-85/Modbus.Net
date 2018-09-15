@@ -9,19 +9,17 @@ namespace Modbus.Net
     /// <typeparam name="TParamIn">向Connector传入的类型</typeparam>
     /// <typeparam name="TParamOut">从Connector返回的类型</typeparam>
     /// <typeparam name="TProtocalUnit">协议单元的类型</typeparam>
-    public interface IProtocal<TParamIn, TParamOut, TProtocalUnit>
+    public interface IProtocol<TParamIn, TParamOut, TProtocalUnit>
         where TProtocalUnit : IProtocalFormatting<TParamIn, TParamOut>
     {
         /// <summary>
-        ///     协议的连接器
+        ///     Wrapper over the transport instance.
         /// </summary>
         IProtocalLinker<TParamIn, TParamOut> ProtocalLinker { get; }
 
         /// <summary>
-        ///     协议索引器，这是一个懒加载协议，当字典中不存在协议时自动加载协议，否则调用已经加载的协议
+        /// Operations to perform on the node
         /// </summary>
-        /// <param name="type">协议的类的GetType</param>
-        /// <returns>协议的实例</returns>
         TProtocalUnit this[Type type] { get; }
 
         /// <summary>

@@ -64,7 +64,7 @@ namespace Modbus.Net
         /// <param name="startAddress">开始地址</param>
         /// <param name="getByteCount">获取字节数个数</param>
         /// <returns>接收到的对应的类型和数据</returns>
-        Task<T[]> GetDatasAsync<T>(string startAddress, int getByteCount);
+        Task<T[]> GetDataAsync<T>(string startAddress, int getByteCount);
 
         /// <summary>
         ///     获取数据

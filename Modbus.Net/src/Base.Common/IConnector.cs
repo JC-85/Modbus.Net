@@ -30,9 +30,9 @@ namespace Modbus.Net
         Task<bool> ConnectAsync();
 
         /// <summary>
-        ///     断开PLC
+        ///     Close transport.
         /// </summary>
-        /// <returns>是否断开成功</returns>
+        /// <returns>true if disconnected succesfully.</returns>
         bool Disconnect();
 
         /// <summary>

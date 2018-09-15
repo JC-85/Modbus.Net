@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 namespace Modbus.Net.Modbus
 {
     /// <summary>
-    ///     Modbus连接类型
+    ///     Indicates which transport is used to connect with the device.
     /// </summary>
-    public enum ModbusType
+    public enum ModbusTransportType
     {
         /// <summary>
         ///     Rtu连接
@@ -26,12 +26,12 @@ namespace Modbus.Net.Modbus
         /// <summary>
         ///     Rtu连接Tcp透传
         /// </summary>
-        RtuInTcp = 3,
+        RtuOverTcp = 3,
 
         /// <summary>
         ///     Ascii连接Tcp透传
         /// </summary>
-        AsciiInTcp = 4,
+        AsciiOverTcp = 4,
     }
 
     /// <summary>
@@ -51,50 +51,37 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     Modbus基础Api入口
     /// </summary>
-    public class ModbusUtility : BaseUtility, IUtilityMethodTime, IUtilityMethodWriteSingle
+    public class ModbusUtility : BaseUtility<byte[], byte[], ProtocolUnit<byte[],byte[]>>, IUtilityMethodTime, IUtilityMethodWriteSingle
     {
-        /// <summary>
-        ///     Modbus协议类型
-        /// </summary>
-        private ModbusType _modbusType;
-
-        /// <summary>
-        ///     构造函数
-        /// </summary>
-        /// <param name="connectionType">协议类型</param>
-        /// <param name="slaveAddress">从站号</param>
-        /// <param name="masterAddress">主站号</param>
-        /// <param name="endian">端格式</param>
+        
         public ModbusUtility(int connectionType, byte slaveAddress, byte masterAddress,
             Endian endian = Endian.BigEndianLsb)
             : base(slaveAddress, masterAddress)
         {
             Endian = endian;
             ConnectionString = null;
-            ModbusType = (ModbusType) connectionType;
+            ModbusType = (ModbusTransportType) connectionType;
+            InitModbusTransportType();
+
             AddressTranslator = new AddressTranslatorModbus();
         }
 
-        /// <summary>
-        ///     构造函数
-        /// </summary>
-        /// <param name="connectionType">协议类型</param>
-        /// <param name="connectionString">连接地址</param>
-        /// <param name="slaveAddress">从站号</param>
-        /// <param name="masterAddress">主站号</param>
-        /// <param name="endian">端格式</param>
-        public ModbusUtility(ModbusType connectionType, string connectionString, byte slaveAddress, byte masterAddress,
+        public ModbusUtility(ModbusTransportType connectionType, string connectionString, byte slaveAddress, byte masterAddress,
             Endian endian = Endian.BigEndianLsb)
             : base(slaveAddress, masterAddress)
         {
             Endian = endian;
             ConnectionString = connectionString;
             ModbusType = connectionType;
+            InitModbusTransportType();
+
             AddressTranslator = new AddressTranslatorModbus();
         }
 
         /// <summary>
-        ///     端格式
+        ///    Endian-ness for the connection.
+        ///    (Should not be defined on the connection since different registers possibly can have different endian. 
+        ///    Mark as obsolete and replace with DefaultEndian which can then be overridden by the field accessor.)
         /// </summary>
         public override Endian Endian { get; }
 
@@ -126,54 +113,52 @@ namespace Modbus.Net.Modbus
                 }
                 catch (Exception e)
                 {
-                    //Log.Error(e, $"ModbusUtility: {ConnectionString} format error");
+                    Log.Error(e, $"ModbusUtility: {ConnectionString} format error");
                     return null;
                 }
             }
         }
 
-        /// <summary>
-        ///     协议类型
-        /// </summary>
-        public ModbusType ModbusType
-        {
-            get { return _modbusType; }
-            set
+
+        
+        public readonly ModbusTransportType ModbusType;
+
+        void InitModbusTransportType()
             {
-                _modbusType = value;
-                switch (_modbusType)
+            
+                switch (ModbusType)
                 {
                     //Rtu协议
-                    case ModbusType.Rtu:
+                    case ModbusTransportType.Rtu:
                     {
-                        Wrapper = ConnectionString == null
+                        ProtocolWrapper = ConnectionString == null
                             ? new ModbusRtuProtocal(SlaveAddress, MasterAddress)
                             : new ModbusRtuProtocal(ConnectionString, SlaveAddress, MasterAddress);
                         break;
                     }
                     //Tcp协议
-                    case ModbusType.Tcp:
+                    case ModbusTransportType.Tcp:
                     {
-                        Wrapper = ConnectionString == null
-                            ? new ModbusTcpProtocal(SlaveAddress, MasterAddress)
+                        ProtocolWrapper = ConnectionString == null
+                            ? new ModbusTcpProtocol(SlaveAddress, MasterAddress)
                             : (ConnectionStringPort == null
-                                ? new ModbusTcpProtocal(ConnectionString, SlaveAddress, MasterAddress)
-                                : new ModbusTcpProtocal(ConnectionStringIp, ConnectionStringPort.Value, SlaveAddress,
+                                ? new ModbusTcpProtocol(ConnectionString, SlaveAddress, MasterAddress)
+                                : new ModbusTcpProtocol(ConnectionStringIp, ConnectionStringPort.Value, SlaveAddress,
                                     MasterAddress));
                         break;
                     }
                     //Ascii协议
-                    case ModbusType.Ascii:
+                    case ModbusTransportType.Ascii:
                     {
-                        Wrapper = ConnectionString == null
+                        ProtocolWrapper = ConnectionString == null
                             ? new ModbusAsciiProtocal(SlaveAddress, MasterAddress)
                             : new ModbusAsciiProtocal(ConnectionString, SlaveAddress, MasterAddress);
                         break;
                     }
                     //Rtu协议
-                    case ModbusType.RtuInTcp:
+                    case ModbusTransportType.RtuOverTcp:
                     {
-                        Wrapper = ConnectionString == null
+                        ProtocolWrapper = ConnectionString == null
                             ? new ModbusRtuInTcpProtocal(SlaveAddress, MasterAddress)
                             : (ConnectionStringPort == null
                                 ? new ModbusRtuInTcpProtocal(ConnectionString, SlaveAddress, MasterAddress)
@@ -182,9 +167,9 @@ namespace Modbus.Net.Modbus
                         break;
                     }
                     //Ascii协议
-                    case ModbusType.AsciiInTcp:
+                    case ModbusTransportType.AsciiOverTcp:
                     {
-                        Wrapper = ConnectionString == null
+                        ProtocolWrapper = ConnectionString == null
                             ? new ModbusAsciiInTcpProtocal(SlaveAddress, MasterAddress)
                             : (ConnectionStringPort == null
                                 ? new ModbusAsciiInTcpProtocal(ConnectionString, SlaveAddress, MasterAddress)
@@ -194,7 +179,7 @@ namespace Modbus.Net.Modbus
                     }
                 }
             }
-        }
+        
 
         /// <summary>
         ///     读时间
@@ -206,13 +191,13 @@ namespace Modbus.Net.Modbus
             {
                 var inputStruct = new GetSystemTimeModbusInputStruct(SlaveAddress);
                 var outputStruct =
-                    await Wrapper.SendReceiveAsync<GetSystemTimeModbusOutputStruct>(
-                        Wrapper[typeof(GetSystemTimeModbusProtocal)], inputStruct);
+                    await ProtocolWrapper.SendReceiveAsync<GetSystemTimeModbusOutputStruct>(
+                        ProtocolWrapper[typeof(GetSystemTimeModbusProtocal)], inputStruct);
                 return outputStruct?.Time ?? DateTime.MinValue;
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"ModbusUtility -> GetTime: {ConnectionString} error");
+                Log.Error(e, $"ModbusUtility -> GetTime: {ConnectionString} error");
                 return DateTime.MinValue;
             }
         }
@@ -228,25 +213,17 @@ namespace Modbus.Net.Modbus
             {
                 var inputStruct = new SetSystemTimeModbusInputStruct(SlaveAddress, setTime);
                 var outputStruct =
-                    await Wrapper.SendReceiveAsync<SetSystemTimeModbusOutputStruct>(
-                        Wrapper[typeof(SetSystemTimeModbusProtocal)], inputStruct);
+                    await ProtocolWrapper.SendReceiveAsync<SetSystemTimeModbusOutputStruct>(
+                        ProtocolWrapper[typeof(SetSystemTimeModbusProtocal)], inputStruct);
                 return outputStruct?.WriteCount > 0;
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"ModbusUtility -> SetTime: {ConnectionString} error");
+                Log.Error(e, $"ModbusUtility -> SetTime: {ConnectionString} error");
                 return false;
             }
         }
 
-        /// <summary>
-        ///     设置协议类型
-        /// </summary>
-        /// <param name="connectionType">协议类型</param>
-        public override void SetConnectionType(int connectionType)
-        {
-            ModbusType = (ModbusType) connectionType;
-        }
 
         /// <summary>
         ///     读数据
@@ -261,13 +238,13 @@ namespace Modbus.Net.Modbus
                 var inputStruct = new ReadDataModbusInputStruct(SlaveAddress, startAddress,
                     (ushort) getByteCount, AddressTranslator);
                 var outputStruct = await
-                    Wrapper.SendReceiveAsync<ReadDataModbusOutputStruct>(Wrapper[typeof(ReadDataModbusProtocal)],
+                    ProtocolWrapper.SendReceiveAsync<ReadDataModbusOutputStruct>(ProtocolWrapper[typeof(ReadDataModbusProtocal)],
                         inputStruct);
                 return outputStruct?.DataValue;
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"ModbusUtility -> GetDatas: {ConnectionString} error");
+                Log.Error(e, $"ModbusUtility -> GetDatas: {ConnectionString} error");
                 return null;
             }
         }
@@ -285,13 +262,13 @@ namespace Modbus.Net.Modbus
                 var inputStruct = new WriteDataModbusInputStruct(SlaveAddress, startAddress, setContents,
                     AddressTranslator, Endian);
                 var outputStruct = await
-                    Wrapper.SendReceiveAsync<WriteDataModbusOutputStruct>(Wrapper[typeof(WriteDataModbusProtocal)],
+                    ProtocolWrapper.SendReceiveAsync<WriteDataModbusOutputStruct>(ProtocolWrapper[typeof(WriteDataModbusProtocal)],
                         inputStruct);
                 return outputStruct?.WriteCount == setContents.Length;
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"ModbusUtility -> SetDatas: {ConnectionString} error");
+                Log.Error(e, $"ModbusUtility -> SetDatas: {ConnectionString} error");
                 return false;
             }
         }
@@ -309,13 +286,13 @@ namespace Modbus.Net.Modbus
                 var inputStruct = new WriteSingleDataModbusInputStruct(SlaveAddress, startAddress, setContent,
                     (ModbusTranslatorBase)AddressTranslator, Endian);
                 var outputStruct = await
-                    Wrapper.SendReceiveAsync<WriteSingleDataModbusOutputStruct>(Wrapper[typeof(WriteSingleDataModbusProtocal)],
+                    ProtocolWrapper.SendReceiveAsync<WriteSingleDataModbusOutputStruct>(ProtocolWrapper[typeof(WriteSingleDataModbusProtocal)],
                         inputStruct);
                 return outputStruct?.WriteValue.ToString() == setContent.ToString();
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"ModbusUtility -> SetSingleDatas: {ConnectionString} error");
+                Log.Error(e, $"ModbusUtility -> SetSingleDatas: {ConnectionString} error");
                 return false;
             }
         }

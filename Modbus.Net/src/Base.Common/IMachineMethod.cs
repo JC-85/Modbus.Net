@@ -19,13 +19,13 @@ namespace Modbus.Net
         ///     读取数据
         /// </summary>
         /// <returns>从设备读取的数据</returns>
-        Dictionary<string, ReturnUnit> GetDatas(MachineGetDataType getDataType);
+        Dictionary<string, ReturnUnit> GetData(MachineGetDataType getDataType);
 
         /// <summary>
         ///     读取数据
         /// </summary>
         /// <returns>从设备读取的数据</returns>
-        Task<Dictionary<string, ReturnUnit>> GetDatasAsync(MachineGetDataType getDataType);
+        Task<Dictionary<string, ReturnUnit>> GetDataAsync(MachineGetDataType getDataType);
 
         /// <summary>
         ///     写入数据

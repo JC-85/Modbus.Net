@@ -2,17 +2,12 @@
 
 namespace Modbus.Net
 {
-    /// <summary>
-    ///     协议单元
-    /// </summary>
-    public abstract class ProtocalUnit : ProtocalUnit<byte[], byte[]>
-    {
-    }
+    
 
     /// <summary>
     ///     协议单元
     /// </summary>
-    public abstract class ProtocalUnit<TParamIn, TParamOut> : IProtocalFormatting<TParamIn, TParamOut>
+    public abstract class ProtocolUnit<TParamIn, TParamOut> : IProtocalFormatting<TParamIn, TParamOut>
     {
         /// <summary>
         ///     是否为小端格式
@@ -57,24 +52,22 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     转换静态方法，把对象数组转换为字节数组。
+        ///     Converts the contents-array to byte-array using the appropriate endian.
         /// </summary>
-        /// <param name="endian">是否是小端格式</param>
-        /// <param name="contents">对象数组</param>
-        /// <returns>字节数组</returns>
         public static byte[] TranslateContent(Endian endian, params object[] contents)
         {
             return ValueHelper.GetInstance(endian).ObjectArrayToByteArray(contents);
         }
     }
 
+    /*
     /// <summary>
     ///     特殊协议单元，写入这个协议不会执行BytesExtend和BytesDecact
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class SpecialProtocalUnitAttribute : Attribute
     {
-    }
+    }*/
 
     /// <summary>
     ///     输入结构

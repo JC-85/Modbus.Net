@@ -91,7 +91,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     Modbus协议
     /// </summary>
-    public abstract class ModbusProtocal : BaseProtocal
+    public abstract class ModbusProtocal : BaseProtocol
     {
         /// <summary>
         ///     构造函数
@@ -213,7 +213,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     读数据协议
     /// </summary>
-    public class ReadDataModbusProtocal : ProtocalUnit
+    public class ReadDataModbusProtocal : ProtocolUnit<byte[],byte[]>
     {
         /// <summary>
         ///     格式化
@@ -351,7 +351,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     写多个寄存器协议
     /// </summary>
-    public class WriteDataModbusProtocal : ProtocalUnit
+    public class WriteDataModbusProtocal : ProtocolUnit<byte[],byte[]>
     {
         /// <summary>
         ///     格式化
@@ -481,7 +481,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     写多个寄存器协议
     /// </summary>
-    public class WriteSingleDataModbusProtocal : ProtocalUnit
+    public class WriteSingleDataModbusProtocal : ProtocolUnit<byte[],byte[]>
     {
         /// <summary>
         ///     格式化
@@ -610,7 +610,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     读系统时间协议
     /// </summary>
-    public class GetSystemTimeModbusProtocal : ProtocalUnit
+    public class GetSystemTimeModbusProtocal : ProtocolUnit<byte[],byte[]>
     {
         /// <summary>
         ///     格式化
@@ -783,7 +783,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     写系统时间协议
     /// </summary>
-    public class SetSystemTimeModbusProtocal : ProtocalUnit
+    public class SetSystemTimeModbusProtocal : ProtocolUnit<byte[],byte[]>
     {
         /// <summary>
         ///     格式化

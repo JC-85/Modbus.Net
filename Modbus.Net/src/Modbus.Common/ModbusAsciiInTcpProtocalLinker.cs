@@ -6,7 +6,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     Modbus/Ascii码协议连接器Tcp透传
     /// </summary>
-    public class ModbusAsciiInTcpProtocalLinker : TcpProtocalLinker
+    public class ModbusAsciiInTcpProtocalLinker : TcpProtocolLinker
     {
         /// <summary>
         ///     构造函数

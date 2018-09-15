@@ -9,12 +9,12 @@ namespace Modbus.Net
     /// <summary>
     ///     基本协议
     /// </summary>
-    public abstract class BaseProtocal : BaseProtocal<byte[], byte[], ProtocalUnit>
+    public abstract class BaseProtocol : BaseProtocol<byte[], byte[], ProtocolUnit<byte[],byte[]>>
     {
         /// <summary>
         ///     构造器
         /// </summary>
-        protected BaseProtocal(byte slaveAddress, byte masterAddress, Endian endian)
+        protected BaseProtocol(byte slaveAddress, byte masterAddress, Endian endian)
             : base(slaveAddress, masterAddress, endian)
         {
         }
@@ -29,7 +29,7 @@ namespace Modbus.Net
             if (ProtocalLinker == null || !ProtocalLinker.IsConnected)
                 await ConnectAsync();
             if (ProtocalLinker != null)
-                return await ProtocalLinker.SendReceiveAsync(ProtocalUnit.TranslateContent(Endian, content));
+                return await ProtocalLinker.SendReceiveAsync(ProtocolUnit<byte[],byte[]>.TranslateContent(Endian, content));
             return null;
         }
     }
@@ -37,14 +37,14 @@ namespace Modbus.Net
     /// <summary>
     ///     基本协议
     /// </summary>
-    public abstract class BaseProtocal<TParamIn, TParamOut, TProtocalUnit> :
-        IProtocal<TParamIn, TParamOut, TProtocalUnit> where TProtocalUnit : class, IProtocalFormatting<TParamIn, TParamOut>
+    public abstract class BaseProtocol<TParamIn, TParamOut, TProtocalUnit> :
+        IProtocol<TParamIn, TParamOut, TProtocalUnit> where TProtocalUnit : class, IProtocalFormatting<TParamIn, TParamOut>
         where TParamOut : class
     {
         /// <summary>
         ///     构造器
         /// </summary>
-        protected BaseProtocal(byte slaveAddress, byte masterAddress, Endian endian)
+        protected BaseProtocol(byte slaveAddress, byte masterAddress, Endian endian)
         {
             Endian = endian;
             Protocals = new Dictionary<string, TProtocalUnit>();
@@ -92,8 +92,7 @@ namespace Modbus.Net
                     else
                     {
                         //自动寻找存在的协议并将其加载
-                        var protocalUnit =
-                            Activator.CreateInstance(type.GetTypeInfo().Assembly.GetType(protocalName)) as TProtocalUnit;
+                        var protocalUnit = Activator.CreateInstance(type.GetTypeInfo().Assembly.GetType(protocalName)) as TProtocalUnit;
                         if (protocalUnit == null)
                             throw new InvalidCastException($"No ProtocalUnit {nameof(TProtocalUnit)} implemented");
                         protocalUnit.Endian = Endian;
@@ -201,10 +200,12 @@ namespace Modbus.Net
             if (formatContent != null)
             {
                 TParamOut receiveContent;
-                //如果为特别处理协议的话，跳过协议扩展收缩
+                
+                
+                /*
                 if (unit.GetType().GetTypeInfo().GetCustomAttributes(typeof(SpecialProtocalUnitAttribute)).Any())
                     receiveContent = await ProtocalLinker.SendReceiveWithoutExtAndDecAsync(formatContent);
-                else
+                else*/
                     receiveContent = await ProtocalLinker.SendReceiveAsync(formatContent);
                 if (receiveContent != null)
                     return unit.Unformat<T>(receiveContent, ref t);

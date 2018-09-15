@@ -5,7 +5,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     Modbus/Tcp协议连接器
     /// </summary>
-    public class ModbusTcpProtocalLinker : TcpProtocalLinker
+    public class ModbusTcpProtocalLinker : TcpProtocolLinker
     {
         /// <summary>
         ///     构造函数
@@ -32,7 +32,7 @@ namespace Modbus.Net.Modbus
         /// <returns>数据是否正确</returns>
         public override bool? CheckRight(byte[] content)
         {
-            //ProtocalLinker的CheckRight不会返回null
+            //Checks if content is set. If content is null the tcp-connection will close and false is returned.
             if (!base.CheckRight(content).Value) return false;
             //长度校验失败
             if (content[5] != content.Length - 6)
@@ -41,6 +41,11 @@ namespace Modbus.Net.Modbus
             if (content[7] > 127)
                 throw new ModbusProtocalErrorException(content[2] > 0 ? content[2] : content[8]);
             return true;
+        }
+
+        public override byte[] BytesExtend(byte[] content)
+        {
+            return new ModbusTcpProtocalLinkerBytesExtend().BytesExtend(content);
         }
     }
 }

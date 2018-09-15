@@ -474,24 +474,26 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     将待转换的对象数组转换为需要发送的byte数组
+        ///     Flattens objectArray and casts each object to byte and then returns the byte-array.
         /// </summary>
-        /// <param name="contents">object数组</param>
+        /// <param name="objectArray">object数组</param>
         /// <returns>byte数组</returns>
-        public virtual byte[] ObjectArrayToByteArray(object[] contents)
+        public virtual byte[] ObjectArrayToByteArray(object[] objectArray)
         {
+            /// objectArray might be array of array of array etc.
+            /// This foreach recursively flattens the list.
+            
+
             var b = false;
-            //先查找传入的结构中有没有数组，有的话将其打开
             var newContentsList = new List<object>();
-            foreach (var content in contents)
+
+            foreach (var content in objectArray)
             {
                 var t = content.GetType().ToString();
                 if (t.Substring(t.Length - 2, 2) == "[]")
                 {
                     b = true;
-                    //自动将目标数组中内含的子数组展开，是所有包含在子数组拼接为一个数组
-                    var contentArray =
-                        ArrayList.Adapter((Array) content).ToArray(typeof(object)).OfType<object>();
+                    var contentArray = ArrayList.Adapter((Array) content).ToArray(typeof(object)).OfType<object>();
                     newContentsList.AddRange(contentArray);
                 }
                 else
@@ -499,15 +501,19 @@ namespace Modbus.Net
                     newContentsList.Add(content);
                 }
             }
-            //重新调用一边这个函数，这个传入的参数中一定没有数组。
+            
             if (b) return ObjectArrayToByteArray(newContentsList.ToArray());
-            //把参数一个一个翻译为相对应的字节，然后拼成一个队列
+            
+            ///At this point newContentList is a flattened list from objectArray.
+            ///ObjectArray contains the last entry that needed to be flattened.
+            
             var translateTarget = new List<byte>();
-            //将bool类型拼装为byte类型时，按照8个一组，不满8个时补false为原则进行
+            
             var lastIsBool = false;
             byte boolToByteTemp = 0;
             var boolToByteCount = 0;
-            foreach (var content in contents)
+
+            foreach (var content in objectArray)
             {
                 var t = content.GetType().ToString();
                 if (t == "System.Boolean")
@@ -713,7 +719,7 @@ namespace Modbus.Net
                     }
                     catch (Exception e)
                     {
-                        //Log.Error(e, "ValueHelper -> ByteArrayToObjectArray error");
+                        Log.Error(e, "ValueHelper -> ByteArrayToObjectArray error");
                         count = contents.Length;
                     }
                 }
@@ -821,7 +827,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                //Log.Error(e, "ValueHelper -> SetValue set value failed");
+                Log.Error(e, "ValueHelper -> SetValue set value failed");
                 return false;
             }
         }
@@ -870,7 +876,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                //Log.Error(e, "ValueHelper -> SetBit set bit failed");
+                Log.Error(e, "ValueHelper -> SetBit set bit failed");
                 return false;
             }
         }
@@ -961,38 +967,31 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     将int数字转换为byte数组
+        ///     Converts the value to bytes and returns them in reverse order.
         /// </summary>
-        /// <param name="value">待转换的值</param>
-        /// <returns>转换后的byte数组</returns>
         public override byte[] GetBytes(int value)
         {
             return Reverse(BitConverter.GetBytes(value));
         }
 
         /// <summary>
-        ///     将long数字转换为byte数组
+        ///    Converts the value to bytes and returns them in reverse order.
         /// </summary>
-        /// <param name="value">待转换的值</param>
-        /// <returns>转换后的byte数组</returns>
-        /// <returns>转换出的数字</returns>
         public override byte[] GetBytes(long value)
         {
             return Reverse(BitConverter.GetBytes(value));
         }
 
         /// <summary>
-        ///     将ushort数字转换为byte数组
+        ///  Converts the value to bytes and returns them in reverse order.
         /// </summary>
-        /// <param name="value">待转换的值</param>
-        /// <returns>转换后的byte数组</returns>
         public override byte[] GetBytes(ushort value)
         {
             return Reverse(BitConverter.GetBytes(value));
         }
 
         /// <summary>
-        ///     将uint数字转换为byte数组
+        ///    Converts the value to bytes and returns them in reverse order.
         /// </summary>
         /// <param name="value">待转换的值</param>
         /// <returns>转换后的byte数组</returns>
@@ -1002,7 +1001,7 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     将ulong数字转换为byte数组
+        ///    Converts the value to bytes and returns them in reverse order.
         /// </summary>
         /// <param name="value">待转换的值</param>
         /// <returns>转换后的byte数组</returns>
@@ -1032,7 +1031,7 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     将byte数组中相应的位置转换为short数字
+        ///     
         /// </summary>
         /// <param name="data">待转换的数组</param>
         /// <param name="pos">转换数字的位置</param>
@@ -1079,9 +1078,6 @@ namespace Modbus.Net
         /// <summary>
         ///     将byte数组中相应的位置转换为ushort数字
         /// </summary>
-        /// <param name="data">待转换的数组</param>
-        /// <param name="pos">转换数字的位置</param>
-        /// <returns>转换出的数字</returns>
         public override ushort GetUShort(byte[] data, ref int pos)
         {
             Array.Reverse(data, pos, 2);
@@ -1094,9 +1090,6 @@ namespace Modbus.Net
         /// <summary>
         ///     将byte数组中相应的位置转换为uint数字
         /// </summary>
-        /// <param name="data">待转换的数组</param>
-        /// <param name="pos">转换数字的位置</param>
-        /// <returns>转换出的数字</returns>
         public override uint GetUInt(byte[] data, ref int pos)
         {
             Array.Reverse(data, pos, 4);
@@ -1109,9 +1102,6 @@ namespace Modbus.Net
         /// <summary>
         ///     将byte数组中相应的位置转换为ulong数字
         /// </summary>
-        /// <param name="data">待转换的数组</param>
-        /// <param name="pos">转换数字的位置</param>
-        /// <returns>转换出的数字</returns>
         public override ulong GetULong(byte[] data, ref int pos)
         {
             Array.Reverse(data, pos, 8);
@@ -1124,9 +1114,6 @@ namespace Modbus.Net
         /// <summary>
         ///     将byte数组中相应的位置转换为float数字
         /// </summary>
-        /// <param name="data">待转换的数组</param>
-        /// <param name="pos">转换数字的位置</param>
-        /// <returns>转换出的数字</returns>
         public override float GetFloat(byte[] data, ref int pos)
         {
             Array.Reverse(data, pos, 4);

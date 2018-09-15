@@ -20,7 +20,7 @@ namespace Modbus.Net
         public abstract string ConnectionToken { get; }
 
         /// <summary>
-        ///     是否处于连接状态
+        /// Returns true if a connection has been established.
         /// </summary>
         public abstract bool IsConnected { get; }
 

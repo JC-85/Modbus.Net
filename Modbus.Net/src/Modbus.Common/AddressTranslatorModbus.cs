@@ -5,21 +5,9 @@ namespace Modbus.Net.Modbus
 {
     public abstract class ModbusTranslatorBase : AddressTranslator
     {
-        /// <summary>
-        ///     地址转换
-        /// </summary>
-        /// <param name="address">格式化的地址</param>
-        /// <param name="isRead">是否为读取，是为读取，否为写入</param>
-        /// <param name="isSingle">是否只写入一个数据</param>
-        /// <returns>翻译后的地址</returns>
+        
         public abstract AddressDef AddressTranslate(string address, bool isRead, bool isSingle);
-
-        /// <summary>
-        ///     地址转换
-        /// </summary>
-        /// <param name="address">格式化的地址</param>
-        /// <param name="isRead">是否为读取，是为读取，否为写入</param>
-        /// <returns>翻译后的地址</returns>
+        
         public override AddressDef AddressTranslate(string address, bool isRead)
         {
             return AddressTranslate(address, isRead, false);
@@ -327,6 +315,7 @@ namespace Modbus.Net.Modbus
                     new AreaOutputDef {Code = (int) ModbusProtocalReadDataFunctionCode.ReadHoldRegister, AreaWidth = 2}
                 }
             };
+
             WriteFunctionCodeDictionary = new Dictionary<(string, bool), AreaOutputDef>
             {
                 {

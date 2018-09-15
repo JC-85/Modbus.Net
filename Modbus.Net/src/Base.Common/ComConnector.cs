@@ -10,14 +10,12 @@ using System.Threading.Tasks;
 namespace Modbus.Net
 {
     /// <summary>
-    ///     具有发送锁的串口
+    ///     SerialPort with lock-object for synchronization.
     /// </summary>
     public class SerialPortLock : SerialPort
     {
-        /// <summary>
-        ///     发送锁
-        /// </summary>
-        public object Lock { get; set; } = new object();
+        
+        public object LockObject { get; set; } = new object();
     }
 
     /// <summary>
@@ -71,45 +69,35 @@ namespace Modbus.Net
         private bool m_disposed;
 
         /// <summary>
-        ///     构造器
+        ///     Creates a new serial-transport to a specific slave. Reuses existing com-port if altready connected.
         /// </summary>
-        /// <param name="com">串口地址:从站号</param>
-        /// <param name="baudRate">波特率</param>
-        /// <param name="parity">校验位</param>
-        /// <param name="stopBits">停止位</param>
-        /// <param name="dataBits">数据位</param>
-        /// <param name="timeoutTime">超时时间</param>
+        /// <param name="com">COM-Port and slave numer. "COM1:1"</param>
         public ComConnector(string com, int baudRate, Parity parity, StopBits stopBits, int dataBits, int timeoutTime)
         {
-            //端口号 
+            /// Here com argument is defined as "COM-PORT:SLAVE" but ConnectionToken is defined in reverse order.
+            /// Which is correct?
+
             _com = com.Split(':')[0];
-            //读超时
             _timeoutTime = timeoutTime;
-            //波特率
             _baudRate = baudRate;
-            //奇偶校验
             _parity = parity;
-            //停止位 
             _stopBits = stopBits;
-            //数据位
             _dataBits = dataBits;
-            //从站号
             _slave = com.Split(':')[1];
         }
 
         /// <summary>
-        ///     连接中的串口
+        ///     List of used Serial-Ports.
         /// </summary>
-        private static Dictionary<string, SerialPortLock> Connectors { get; } = new Dictionary<string, SerialPortLock>()
-            ;
+        private static Dictionary<string, SerialPortLock> Connectors { get; } = new Dictionary<string, SerialPortLock>();
 
         /// <summary>
-        ///     连接中的连接器
+        ///    List of slaves and their corresponding serial port.
         /// </summary>
         private static Dictionary<string, string> Linkers { get; } = new Dictionary<string, string>();
 
         /// <summary>
-        ///     连接关键字(串口号:从站号)
+        ///     String representation of com-port/slaveID pair. (Might be in wrong order.)
         /// </summary>
         public override string ConnectionToken => _slave + ":" + _com;
 
@@ -129,9 +117,7 @@ namespace Modbus.Net
         public void Dispose()
         {
             Dispose(true);
-            //.NET Framework 类库
-            // GC..::.SuppressFinalize 方法
-            //请求系统不要调用指定对象的终结器。
+            
             GC.SuppressFinalize(this);
         }
 
@@ -177,34 +163,37 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     串口同步读(阻塞方式读串口，直到串口缓冲区中没有数据,靠字符间间隔超时确定没有数据)
+        ///     Reads from SerialPort stream until end or readMaxCount reached. This is a blocking operation.
         /// </summary>
-        /// <param name="readBuf">串口数据缓冲 </param>
-        /// <param name="readRoom">串口数据缓冲空间大小 </param>
-        /// <param name="byteTime">字节间隔最大时间 </param>
-        /// <returns>从串口实际读入的字节个数 </returns>
-        public int ReadBlock(byte[] readBuf, int readRoom, int byteTime)
+        /// <param name="readBuf">Buffer to fill from stream.</param>
+        /// <param name="readMaxCount">Max number of bytes to read.</param>
+        /// <param name="readTimeout">Timeout in milliseconds </param>
+        /// <returns>Number of bytes read.</returns>
+        public int ReadBlock(byte[] readBuf, int readMaxCount, int readTimeout)
         {
+            if (readBuf.Length < readMaxCount) throw new InvalidOperationException("readBuf is too small.");
+
             if (SerialPort.IsOpen == false)
                 return 0;
-            sbyte nBytelen = 0;
-            SerialPort.ReadTimeout = byteTime;
 
-            while (nBytelen < readRoom - 1 && SerialPort.BytesToRead > 0)
+            sbyte count = 0;
+            SerialPort.ReadTimeout = readTimeout;
+
+            while (count < readMaxCount - 1 && SerialPort.BytesToRead > 0)
             {
-                readBuf[nBytelen] = (byte) SerialPort.ReadByte();
-                nBytelen++; // add one 
+                readBuf[count] = (byte) SerialPort.ReadByte();
+                count++; // add one 
             }
-            readBuf[nBytelen] = 0x00;
-            return nBytelen;
+            readBuf[count] = 0x00;
+            return count;
         }
 
 
         /// <summary>
-        ///     字符数组转字符串16进制
+        ///     Returns byte-array as hex-string representation.
         /// </summary>
-        /// <param name="inBytes"> 二进制字节 </param>
-        /// <returns>类似"01 02 0F" </returns>
+        /// <param name="inBytes">Array of bytes. </param>
+        /// <returns>Returns in the format "01 02 0F" </returns>
         public static string ByteToString(byte[] inBytes)
         {
             var stringOut = "";
@@ -215,9 +204,9 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     strhex 转字节数组
+        ///     Hex-string to byte-array
         /// </summary>
-        /// <param name="inString">类似"01 02 0F" 用空格分开的  </param>
+        /// <param name="inString">"01 02 0F"</param>
         /// <returns> </returns>
         public static byte[] StringToByte(string inString)
         {
@@ -253,10 +242,9 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     字符串 转16进制字符串
+        ///     Takes a string and returns hex-formatted string.
         /// </summary>
-        /// <param name="inString">unico </param>
-        /// <returns>类似“01 0f” </returns>
+        /// <returns>"00 01 02"</returns>
         public static string Str_To_0X(string inString)
         {
             return ByteToString(Encoding.Default.GetBytes(inString));
@@ -281,6 +269,7 @@ namespace Modbus.Net
                     {
                         try
                         {
+
                             SerialPort.Close();
                         }
                         catch
@@ -288,20 +277,19 @@ namespace Modbus.Net
                             //ignore
                         }
                         SerialPort.Dispose();
-                        //Log.Information("Com interface {Com} Disposed", _com);
+                        Log.Information("Com interface {Com} Disposed", _com);
                         Connectors[_com] = null;
                         Connectors.Remove(_com);
                     }
                     Linkers.Remove(_slave);
-                    //Log.Information("Com connector {ConnectionToken} Removed", ConnectionToken);
+                    Log.Information("Com connector {ConnectionToken} Removed", ConnectionToken);
                 }
                 m_disposed = true;
             }
         }
 
         /// <summary>
-        ///     析构函数
-        ///     当客户端没有显示调用Dispose()时由GC完成资源回收功能
+        ///    Destructor. 
         /// </summary>
         ~ComConnector()
         {
@@ -311,19 +299,19 @@ namespace Modbus.Net
         private void RefreshSendCount()
         {
             _sendCount++;
-            //Log.Verbose("Com client {ConnectionToken} send count: {SendCount}", ConnectionToken, _sendCount);
+            Log.Verbose("Com client {ConnectionToken} send count: {SendCount}", ConnectionToken, _sendCount);
         }
 
         private void RefreshReceiveCount()
         {
             _receiveCount++;
-            //Log.Verbose("Com client {ConnectionToken} receive count: {SendCount}", ConnectionToken, _receiveCount);
+            Log.Verbose("Com client {ConnectionToken} receive count: {SendCount}", ConnectionToken, _receiveCount);
         }
 
         private void RefreshErrorCount()
         {
             _errorCount++;
-            //Log.Verbose("Com client {ConnectionToken} error count: {ErrorCount}", ConnectionToken, _errorCount);
+            Log.Verbose("Com client {ConnectionToken} error count: {ErrorCount}", ConnectionToken, _errorCount);
         }
 
         #region 发送接收数据
@@ -342,13 +330,14 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     连接串口
+        ///     Creates a serial port transport and opens it.
         /// </summary>
-        /// <returns>是否连接成功</returns>
+        /// <returns>true if port opened succesfully.</returns>
         public override bool Connect()
         {
             try
             {
+                // Creates new serial port if it doesnt already exist.
                 if (!Connectors.ContainsKey(_com))
                     Connectors.Add(_com, new SerialPortLock
                     {
@@ -359,15 +348,17 @@ namespace Modbus.Net
                         DataBits = _dataBits,
                         ReadTimeout = _timeoutTime
                     });
+
                 if (!Linkers.ContainsKey(_slave))
                     Linkers.Add(_slave, _com);
+
                 SerialPort.Open();
-                //Log.Information("Com client {ConnectionToken} connect success", ConnectionToken);
+                Log.Information($"Com client {ConnectionToken} connect success");
                 return true;
             }
             catch (Exception e)
             {
-                //Log.Error(e, "Com client {ConnectionToken} connect error", ConnectionToken);
+                Log.Error(e, $"Com client {ConnectionToken} connect error");
                 return false;
             }
         }
@@ -391,15 +382,15 @@ namespace Modbus.Net
                 try
                 {
                     Dispose();
-                    //Log.Information("Com client {ConnectionToken} disconnect success", ConnectionToken);
+                    Log.Information($"Com client {ConnectionToken} disconnect success");
                     return true;
                 }
                 catch (Exception e)
                 {
-                    //Log.Error(e, "Com client {ConnectionToken} disconnect error", ConnectionToken);
+                    Log.Error(e, $"Com client {ConnectionToken} disconnect error");
                     return false;
                 }
-            //Log.Error(new Exception("Linkers or Connectors Dictionary not found"),"Com client {ConnectionToken} disconnect error", ConnectionToken);
+            Log.Error(new Exception("Linkers or Connectors Dictionary not found"),$"Com client {ConnectionToken} disconnect error");
             return false;
         }
 
@@ -443,24 +434,24 @@ namespace Modbus.Net
                     }
                     catch (Exception err)
                     {
-                        //Log.Error(err, "Com client {ConnectionToken} open error", ConnectionToken);
+                        Log.Error(err, $"Com client {ConnectionToken} open error");
                         Dispose();
                         SerialPort.Open();
                     }
 
                 byte[] returnBytes;
 
-                lock (SerialPort.Lock)
+                lock (SerialPort.LockObject)
                 {
                     try
                     {
-                        //Log.Verbose("Com client {ConnectionToken} send msg length: {Length}", ConnectionToken,sendbytes.Length);
-                        //Log.Verbose($"Com client {ConnectionToken} send msg: {String.Concat(sendbytes.Select(p => " " + p))}");
+                        Log.Verbose($"Com client {ConnectionToken} send msg length: {sendbytes.Length}");
+                        Log.Verbose($"Com client {ConnectionToken} send msg: {String.Concat(sendbytes.Select(p => " " + p))}");
                         SerialPort.Write(sendbytes, 0, sendbytes.Length);
                     }
                     catch (Exception err)
                     {
-                        //Log.Error(err, "Com client {ConnectionToken} send msg error", ConnectionToken);
+                        Log.Error(err, $"Com client {ConnectionToken} send msg error");
                         return null;
                     }
                     RefreshSendCount();
@@ -468,12 +459,12 @@ namespace Modbus.Net
                     try
                     {
                         returnBytes = ReadMsg();
-                        //Log.Verbose("Com client {ConnectionToken} receive msg length: {Length}", ConnectionToken,returnBytes.Length);
-                        //Log.Verbose($"Com client {ConnectionToken} receive msg: {String.Concat(returnBytes.Select(p => " " + p))}");
+                        Log.Verbose("Com client {ConnectionToken} receive msg length: {Length}", ConnectionToken,returnBytes.Length);
+                        Log.Verbose($"Com client {ConnectionToken} receive msg: {String.Concat(returnBytes.Select(p => " " + p))}");
                     }
                     catch (Exception e)
                     {
-                        //Log.Error(e, "Com client {ConnectionToken} read msg error", ConnectionToken);
+                        Log.Error(e, $"Com client {ConnectionToken} read msg error");
                         return null;
                     }
                     RefreshReceiveCount();
@@ -482,7 +473,7 @@ namespace Modbus.Net
             }
             catch (Exception err)
             {
-                //Log.Error(err, "Com client {ConnectionToken} read error", ConnectionToken);
+                Log.Error(err, $"Com client {ConnectionToken} read error");
                 Dispose();
                 return null;
             }
@@ -514,21 +505,21 @@ namespace Modbus.Net
                     }
                     catch (Exception err)
                     {
-                        //Log.Error(err, "Com client {ConnectionToken} open error", ConnectionToken);
+                        Log.Error(err, $"Com client {ConnectionToken} open error");
                         Dispose();
                         SerialPort.Open();
                     }
-                lock (SerialPort.Lock)
+                lock (SerialPort.LockObject)
                 {
                     try
                     {
-                        //Log.Verbose("Com client {ConnectionToken} send msg length: {Length}", ConnectionToken,sendbytes.Length);
-                        //Log.Verbose($"Com client {ConnectionToken} send msg: {string.Concat(sendbytes.Select(p => " " + p))}");
+                        Log.Verbose($"Com client {ConnectionToken} send msg length: {sendbytes.Length}");
+                        Log.Verbose($"Com client {ConnectionToken} send msg: {string.Concat(sendbytes.Select(p => " " + p))}");
                         SerialPort.Write(sendbytes, 0, sendbytes.Length);
                     }
                     catch (Exception err)
                     {
-                        //Log.Error(err, "Com client {ConnectionToken} send msg error", ConnectionToken);
+                        Log.Error(err, $"Com client {ConnectionToken} send msg error");
                         Dispose();
                         return false;
                     }
@@ -538,7 +529,7 @@ namespace Modbus.Net
             }
             catch (Exception err)
             {
-                //Log.Error(err, "Com client {ConnectionToken} reopen error", ConnectionToken);
+                Log.Error(err, $"Com client {ConnectionToken} reopen error");
                 return false;
             }
         }
@@ -559,7 +550,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                //Log.Error(e, "Com client {ConnectionToken} read error", ConnectionToken);
+                Log.Error(e, $"Com client {ConnectionToken} read error");
                 RefreshErrorCount();
                 Dispose();
                 return null;

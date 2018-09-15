@@ -12,24 +12,31 @@ namespace ConsoleSample
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            
 
-            Modbus.Net.Modbus.ModbusMachine machine = new Modbus.Net.Modbus.ModbusMachine(Modbus.Net.Modbus.ModbusType.Tcp,
-                "192.168.96.62",
-                new List<AddressUnit>
-                {
-                    new AddressUnit()
+            var entities = new List<AddressUnit<string>>
+            {
+                new AddressUnit<string>()
                     {
+                        Id = "Identifier",
                         Address = 0,
                         Area = "0X"
                     }
-                },
+            };
+            
+
+            Modbus.Net.Modbus.ModbusMachine machine = new Modbus.Net.Modbus.ModbusMachine(Modbus.Net.Modbus.ModbusTransportType.Tcp,
+                "192.168.96.62",
+                entities,
                 0,
                 10,
                 Endian.LittleEndianLsb);
             machine.Connect();
+            
+            var dataAsyncTask = machine.GetDataAsync(MachineGetDataType.Address);
+            dataAsyncTask.Wait();
+            var asyncResult = dataAsyncTask.Result;
 
-            var data = machine.GetDatas(MachineGetDataType.CommunicationTag);
+            //var data = machine.GetData(MachineGetDataType.CommunicationTag);
 
             Console.ReadKey();
         }

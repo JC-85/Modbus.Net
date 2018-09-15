@@ -3,41 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-/// <summary>
-///     端格式
-/// </summary>
-public enum Endian
-{
-    /// <summary>
-    ///     小端
-    /// </summary>
-    LittleEndianLsb,
-
-    /// <summary>
-    ///     大端-小端位
-    /// </summary>
-    BigEndianLsb,
-
-    /// <summary>
-    ///     大端-大端位
-    /// </summary>
-    BigEndianMsb
-}
 
 namespace Modbus.Net
 {
+
     /// <summary>
-    ///     基础Api入口
+    ///     端格式
     /// </summary>
-    public abstract class BaseUtility : BaseUtility<byte[], byte[], ProtocalUnit>
+    public enum Endian
     {
         /// <summary>
-        ///     构造器
+        ///     小端
+        /// </summary>
+        LittleEndianLsb,
+
+        /// <summary>
+        ///     大端-小端位
+        /// </summary>
+        BigEndianLsb,
+
+        /// <summary>
+        ///     大端-大端位
+        /// </summary>
+        BigEndianMsb
+    }
+
+    /*
+    public abstract class BaseUtility : BaseUtility<byte[], byte[], ProtocolUnit>
+    {
+        /// <summary>
+        ///     Utilities are used by machines to read and write data to devices. Can be used directly.
         /// </summary>
         protected BaseUtility(byte slaveAddress, byte masterAddress) : base(slaveAddress, masterAddress)
         {
         }
-    }
+    }*/
 
     /// <summary>
     ///     基础Api入口
@@ -48,7 +48,7 @@ namespace Modbus.Net
         /// <summary>
         ///     协议收发主体
         /// </summary>
-        protected IProtocal<TParamIn, TParamOut, TProtocalUnit> Wrapper;
+        protected IProtocol<TParamIn, TParamOut, TProtocalUnit> ProtocolWrapper;
 
         /// <summary>
         ///     构造器
@@ -126,7 +126,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"ModbusUtility -> GetDatas: {ConnectionString} error");
+                Log.Error(e, $"ModbusUtility -> GetDatas: {ConnectionString} error");
                 return null;
             }
         }
@@ -141,7 +141,7 @@ namespace Modbus.Net
         public virtual T[] GetDatas<T>(string startAddress,
             int getByteCount)
         {
-            return AsyncHelper.RunSync(() => GetDatasAsync<T>(startAddress, getByteCount));
+            return AsyncHelper.RunSync(() => GetDataAsync<T>(startAddress, getByteCount));
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Modbus.Net
         /// <param name="startAddress">开始地址</param>
         /// <param name="getByteCount">获取字节数个数</param>
         /// <returns>接收到的对应的类型和数据</returns>
-        public virtual async Task<T[]> GetDatasAsync<T>(string startAddress,
+        public virtual async Task<T[]> GetDataAsync<T>(string startAddress,
             int getByteCount)
         {
             try
@@ -162,7 +162,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"ModbusUtility -> GetDatas Generic: {ConnectionString} error");
+                Log.Error(e, $"ModbusUtility -> GetDatas Generic: {ConnectionString} error");
                 return null;
             }
         }
@@ -203,7 +203,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"ModbusUtility -> GetDatas pair: {ConnectionString} error");
+                Log.Error(e, $"ModbusUtility -> GetDatas pair: {ConnectionString} error");
                 return null;
             }
         }
@@ -235,13 +235,13 @@ namespace Modbus.Net
         /// <summary>
         ///     设备是否已经连接
         /// </summary>
-        public bool IsConnected => Wrapper?.ProtocalLinker != null && Wrapper.ProtocalLinker.IsConnected;
+        public bool IsConnected => ProtocolWrapper?.ProtocalLinker != null && ProtocolWrapper.ProtocalLinker.IsConnected;
 
         /// <summary>
         ///     标识设备的连接关键字
         /// </summary>
         public string ConnectionToken
-            => Wrapper?.ProtocalLinker == null ? ConnectionString : Wrapper.ProtocalLinker.ConnectionToken;
+            => ProtocolWrapper?.ProtocalLinker == null ? ConnectionString : ProtocolWrapper.ProtocalLinker.ConnectionToken;
 
         /// <summary>
         ///     地址翻译器
@@ -254,7 +254,7 @@ namespace Modbus.Net
         /// <returns>设备是否连接成功</returns>
         public bool Connect()
         {
-            return Wrapper.Connect();
+            return ProtocolWrapper.Connect();
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace Modbus.Net
         /// <returns>设备是否连接成功</returns>
         public async Task<bool> ConnectAsync()
         {
-            return await Wrapper.ConnectAsync();
+            return await ProtocolWrapper.ConnectAsync();
         }
 
         /// <summary>
@@ -272,7 +272,7 @@ namespace Modbus.Net
         /// <returns>设备是否断开成功</returns>
         public bool Disconnect()
         {
-            return Wrapper.Disconnect();
+            return ProtocolWrapper.Disconnect();
         }
 
         /// <summary>
@@ -289,11 +289,6 @@ namespace Modbus.Net
             return null;
         }
 
-        /// <summary>
-        ///     设置连接类型
-        /// </summary>
-        /// <param name="connectionType">连接类型</param>
-        public abstract void SetConnectionType(int connectionType);
     }
 
     /// <summary>

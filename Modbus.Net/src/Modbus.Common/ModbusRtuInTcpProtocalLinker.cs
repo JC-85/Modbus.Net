@@ -5,7 +5,7 @@ namespace Modbus.Net.Modbus
     /// <summary>
     ///     Modbus/Rtu协议连接器
     /// </summary>
-    public class ModbusRtuInTcpProtocalLinker : TcpProtocalLinker
+    public class ModbusRtuInTcpProtocalLinker : TcpProtocolLinker
     {
         /// <summary>
         ///     构造函数

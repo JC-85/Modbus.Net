@@ -49,33 +49,14 @@ namespace Modbus.Net
     /// </summary>
     public abstract class AddressTranslator
     {
-        /// <summary>
-        ///     地址转换
-        /// </summary>
-        /// <param name="address">格式化的地址</param>
-        /// <param name="isRead">是否为读取，是为读取，否为写入</param>
-        /// <returns>翻译后的地址</returns>
+        
         public abstract AddressDef AddressTranslate(string address, bool isRead);
 
-        /// <summary>
-        ///     获取区域中的单个地址占用的字节长度
-        /// </summary>
-        /// <param name="area">区域名称</param>
-        /// <returns>字节长度</returns>
         public abstract double GetAreaByteLength(string area);
     }
 
-    /// <summary>
-    ///     基本的地址翻译器
-    /// </summary>
     public class AddressTranslatorBase : AddressTranslator
     {
-        /// <summary>
-        ///     地址转换
-        /// </summary>
-        /// <param name="address">地址前地址</param>
-        /// <param name="isRead">是否为读取，是为读取，否为写入</param>
-        /// <returns>Key为转换后的地址，Value为辅助码</returns>
         public override AddressDef AddressTranslate(string address, bool isRead)
         {
             int num1, num2, num3;
@@ -104,7 +85,7 @@ namespace Modbus.Net
         }
 
         /// <summary>
-        ///     获取区域中的单个地址占用的字节长度
+        ///    KILL IT WITH FIRE
         /// </summary>
         /// <param name="area">区域名称</param>
         /// <returns>字节长度</returns>

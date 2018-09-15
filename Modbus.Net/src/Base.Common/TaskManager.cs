@@ -411,7 +411,7 @@ namespace Modbus.Net
                 var ans =
                     await tasks.StartNew(
                         async () => await machine.GetMachineMethods<IMachineMethodData>()
-                            .GetDatasAsync(
+                            .GetDataAsync(
                             getDataType).WithCancellation(cts.Token)).Unwrap();
                 return new DataReturnDef
                 {
@@ -848,13 +848,13 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"Device {id} get error, maybe duplicated in taskmanager");
+                Log.Error(e, $"Device {id} get error, maybe duplicated in taskmanager");
                 return null;
             }
         }
 
         /// <summary>
-        ///     通过通讯标志获取设备
+        ///     Fetches machine from list of machines by its connectionString. Fails if the machine is disconnected, which is weird.
         /// </summary>
         /// <typeparam name="TUnitKey">设备地址Id的类型</typeparam>
         /// <param name="connectionToken">通讯标志</param>
@@ -873,7 +873,7 @@ namespace Modbus.Net
             }
             catch (Exception e)
             {
-                //Log.Error(e, $"Device {connectionToken} get error, maybe duplicated in taskmanager");
+                Log.Error(e, $"Device {connectionToken} get error, maybe duplicated in taskmanager");
                 return null;
             }
         }
