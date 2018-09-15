@@ -1,4 +1,6 @@
-(https://travis-ci.org/JC-85/Modbus.Net.Simple.svg?branch=master)
+![build status](https://travis-ci.org/JC-85/Modbus.Net.Simple.svg?branch=master)
+
+
 Modbus.Net.Simple Oveview
 ===================
 Modbus.Net.Simple is a fork of parallelbgls Modbus.Net library. The goals of this is as follows:
