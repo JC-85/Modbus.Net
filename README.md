@@ -1,4 +1,4 @@
-﻿﻿Modbus.Net.Simple Oveview
+Modbus.Net.Simple Oveview
 ===================
 Modbus.Net.Simple is a fork of parallelbgls Modbus.Net library. The goals of this is as follows:
 * Ease of use
